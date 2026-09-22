@@ -1,7 +1,7 @@
 {
   "name": "vue3renderer",
-  "version": "0.1.0",
-  "description": "Render .vue SFCs or web pages to PNG screenshots — warm browser, concurrency-limited, props-driven data.",
+  "version": "0.1.1",
+  "description": "渲染器：把 .vue 单文件组件或网页渲染成 PNG 截图，常驻浏览器、并发限流、props 数据驱动。",
   "type": "module",
   "main": "dist/render.js",
   "types": "dist/render.d.ts",
