@@ -1,12 +1,13 @@
 {
   "name": "vue3renderer",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "渲染器：把 .vue 单文件组件或网页渲染成 PNG 截图，常驻浏览器、并发限流、props 数据驱动。",
   "type": "module",
   "main": "dist/render.js",
   "types": "dist/render.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "docs/architecture.svg"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
