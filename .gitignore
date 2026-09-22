@@ -1,0 +1,9 @@
+node_modules/
+dist/
+
+# 本地运行产生的截图产物
+*.png
+*.html
+
+# 本地配置（含密钥，勿提交）
+.claude/
