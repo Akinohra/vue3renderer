@@ -1,9 +1,11 @@
 node_modules/
 dist/
 
-# 本地运行产生的截图产物
+# 本地运行产生的截图产物（docs/ 下的架构图除外）
 *.png
 *.html
+!docs/
+!docs/**
 
 # 本地配置（含密钥，勿提交）
 .claude/

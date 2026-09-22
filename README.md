@@ -8,6 +8,14 @@
 - **数据驱动**：通过 `props` 给模板传 JSON 数据，同一模板渲染不同结果，无状态残留
 - **跨平台**：自动探测 Windows / Linux 下的 Chrome 路径，也可手动指定
 
+## 架构图
+
+<p align="center">
+  <img src="docs/architecture.svg" alt="vue3renderer architecture" width="860">
+</p>
+
+<p align="center"><sub>调用方一次配置创建 SnapshotRenderer；.vue 文件经 vue3tohtml 在内存中 SSR 编译（props 透传），网址直接 goto；两者都在常驻 Chromium 上渲染，信号量限流排队，输出 PNG/JPEG Buffer。图会跟随你的深浅色主题。<br>源文件 <a href="docs/architecture.html">docs/architecture.html</a>（可交互，支持导出），修改后运行 <code>node export-diagram.ts</code> 重新生成。</sub></p>
+
 ## 安装
 
 ```bash
