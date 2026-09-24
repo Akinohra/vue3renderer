@@ -252,34 +252,49 @@ export class SnapshotRenderer {
     })
   }
 
-  /** 截取网页为 PNG/JPEG */
-  async snapshotUrl(url: string, output?: string, options?: SnapshotOptions): Promise<Buffer> {
-    const buffer = await this.#withPage(options ?? {}, async (page) => {
+  /** 截取网页为 PNG/JPEG（第二个参数传路径字符串落盘，传 options 对象则纯内存） */
+  async snapshotUrl(
+    url: string,
+    output?: string | SnapshotOptions,
+    options?: SnapshotOptions,
+  ): Promise<Buffer> {
+    const args = splitArgs(output, options)
+    const buffer = await this.#withPage(args.options ?? {}, async (page) => {
       await page.goto(url, {
-        waitUntil: options?.waitUntil ?? 'networkidle',
-        timeout: options?.timeout ?? 30_000,
+        waitUntil: args.options?.waitUntil ?? 'networkidle',
+        timeout: args.options?.timeout ?? 30_000,
       })
     })
-    return save(buffer, output)
+    return save(buffer, args.output)
   }
 
   /** 渲染 .vue 单文件组件并截取为 PNG（SFC 内存编译，无中间文件） */
-  async snapshotVue(vueFile: string, output?: string, options?: SnapshotOptions): Promise<Buffer> {
-    const html = await compileVueToStaticHTML(vueFile, { props: options?.props })
-    const buffer = await this.#withPage(options ?? {}, (page) =>
+  async snapshotVue(
+    vueFile: string,
+    output?: string | SnapshotOptions,
+    options?: SnapshotOptions,
+  ): Promise<Buffer> {
+    const args = splitArgs(output, options)
+    const html = await compileVueToStaticHTML(vueFile, { props: args.options?.props })
+    const buffer = await this.#withPage(args.options ?? {}, (page) =>
       page.setContent(html, {
-        waitUntil: options?.waitUntil ?? 'load',
-        timeout: options?.timeout ?? 30_000,
+        waitUntil: args.options?.waitUntil ?? 'load',
+        timeout: args.options?.timeout ?? 30_000,
       }),
     )
-    return save(buffer, output)
+    return save(buffer, args.output)
   }
 
   /** 自动识别来源：http(s):// 开头按网址处理，否则按 .vue 文件路径处理 */
-  async snapshot(source: string, output?: string, options?: SnapshotOptions): Promise<Buffer> {
+  async snapshot(
+    source: string,
+    output?: string | SnapshotOptions,
+    options?: SnapshotOptions,
+  ): Promise<Buffer> {
+    const args = splitArgs(output, options)
     return /^https?:\/\//i.test(source)
-      ? this.snapshotUrl(source, output, options)
-      : this.snapshotVue(source, output, options)
+      ? this.snapshotUrl(source, args.output, args.options)
+      : this.snapshotVue(source, args.output, args.options)
   }
 
   /** 关闭常驻浏览器；之后再截图会自动重启 */
@@ -313,6 +328,17 @@ async function save(buffer: Buffer, output?: string): Promise<Buffer> {
   return buffer
 }
 
+/**
+ * 归一化 (output, options) 参数：第二个参数传字符串视为落盘路径，
+ * 传对象视为 options——纯内存截图不必显式传 undefined 占位
+ */
+function splitArgs(
+  output?: string | SnapshotOptions,
+  options?: SnapshotOptions,
+): { output?: string; options?: SnapshotOptions } {
+  return typeof output === 'string' ? { output, options } : { options: output ?? options }
+}
+
 // ---- 无配置快捷方式：不想创建实例时，直接调用这三个函数（走共享常驻浏览器）----
 
 let shared: SnapshotRenderer | null = null
@@ -324,7 +350,7 @@ function getShared(): SnapshotRenderer {
 /** 截取网页为 PNG（走共享常驻浏览器，无任何预设） */
 export async function snapshotUrl(
   url: string,
-  output?: string,
+  output?: string | SnapshotOptions,
   options?: SnapshotOptions,
 ): Promise<Buffer> {
   return getShared().snapshotUrl(url, output, options)
@@ -333,7 +359,7 @@ export async function snapshotUrl(
 /** 渲染 .vue 单文件组件并截取为 PNG（走共享常驻浏览器，无任何预设） */
 export async function snapshotVue(
   vueFile: string,
-  output?: string,
+  output?: string | SnapshotOptions,
   options?: SnapshotOptions,
 ): Promise<Buffer> {
   return getShared().snapshotVue(vueFile, output, options)
@@ -342,7 +368,7 @@ export async function snapshotVue(
 /** 自动识别来源截图：http(s):// 开头按网址，否则按 .vue 文件（走共享常驻浏览器） */
 export async function snapshot(
   source: string,
-  output?: string,
+  output?: string | SnapshotOptions,
   options?: SnapshotOptions,
 ): Promise<Buffer> {
   return getShared().snapshot(source, output, options)

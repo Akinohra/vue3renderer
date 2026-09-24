@@ -101,6 +101,14 @@ await shot.snapshotVue('./UserCard.vue', 'bob.png', {
 })
 ```
 
+不落盘、只要内存中的图片 Buffer 时，省略路径参数即可（第二个参数直接传 options）：
+
+```ts
+const buf = await shot.snapshotVue('./UserCard.vue', {
+  props: { user: { name: 'Alice', tags: ['a', 'b'] } },
+}) // => PNG Buffer，适合接口直接返回
+```
+
 注意事项：
 
 - `<script setup>` 用了 TS 泛型语法（`defineProps<{...}>()`）时必须带 `lang="ts"`
